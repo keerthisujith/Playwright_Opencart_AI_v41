@@ -12,9 +12,15 @@ export class Helper {
   }
 
   static getLoginDetails() {
+    const { APP_EMAIL, APP_PASSWORD } = process.env;
+
+    if (!APP_EMAIL || !APP_PASSWORD) {
+      throw new Error("APP_EMAIL and APP_PASSWORD must be configured.");
+    }
+
     return {
-      email: "keerthi@abc.com",
-      password: "test@123",
+      email: APP_EMAIL,
+      password: APP_PASSWORD,
     };
   }
 }
