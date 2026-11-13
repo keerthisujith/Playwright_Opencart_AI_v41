@@ -11,7 +11,10 @@ export async function executeQuery(sql: string, params?: any[]) {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
   });
-  const [result] = await connection.execute(sql, params);
-  await connection.end();
-  return result;
+  try {
+    const [result] = await connection.execute(sql, params);
+    return result;
+  } finally {
+    await connection.end();
+  }
 }
