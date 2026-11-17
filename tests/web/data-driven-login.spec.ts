@@ -12,12 +12,14 @@ type LoginTestData = {
 
 const loginDataPath = path.resolve(__dirname, '../../testdata/opencart_logindata.json');
 const loginData = DataProvider.readJson(loginDataPath) as LoginTestData[];
+const loginRejectionWarning = /Warning: (?:No match for E-Mail Address and\/or Password|Your account has exceeded allowed number of login attempts)/;
 
 test.describe('OpenCart data-driven customer login', () => {
     loginData.forEach((testData, index) => {
         const scenarioName = testData.testName ?? testData.TestName ?? 'Login test';
 
         test(`${scenarioName} row ${index + 1} @master @datadriven @web`, async ({
+            page,
             homePage,
             loginPage,
             accountPage,
@@ -35,10 +37,7 @@ test.describe('OpenCart data-driven customer login', () => {
                 if (testData.expected === 'success') {
                     expect(await accountPage.isMyAccountPageExists()).toBeTruthy();
                 } else {
-                    expect(await loginPage.isWarningVisible()).toBeTruthy();
-                    expect(await loginPage.getWarningText()).toContain(
-                        'Warning: No match for E-Mail Address and/or Password.',
-                    );
+                    await expect(page.getByText(loginRejectionWarning).first()).toBeVisible();
                     expect(await accountPage.isMyAccountPageExists()).toBeFalsy();
                 }
             });

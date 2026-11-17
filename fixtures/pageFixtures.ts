@@ -1,6 +1,7 @@
 import { test as base, expect } from '@playwright/test';
 import dotenv from 'dotenv';
 import { AccountPage } from '../pages/AccountPage';
+import { AdminCustomersPage } from '../pages/AdminCustomersPage';
 import { HomePage } from '../pages/HomePage';
 import { LoginPage } from '../pages/LoginPage';
 import { LogoutPage } from '../pages/LogoutPage';
@@ -18,7 +19,9 @@ if (!APP_URL) {
 }
 
 type PageFixtures = {
+    adminCustomersPage: AdminCustomersPage;
     homePage: HomePage;
+    dbTestHomePage: HomePage;
     registerPage: RegisterPage;
     loginPage: LoginPage;
     logoutPage: LogoutPage;
@@ -29,8 +32,19 @@ type PageFixtures = {
 };
 
 export const test = base.extend<PageFixtures>({
+    adminCustomersPage: async ({ page }, use) => {
+        await use(new AdminCustomersPage(page));
+    },
     homePage: async ({ page }, use) => {
         await page.goto(APP_URL);
+        await use(new HomePage(page));
+    },
+    dbTestHomePage: async ({ page }, use) => {
+        const appUrl = process.env.DB_TEST_WEB_APP_URL;
+        if (!appUrl) {
+            throw new Error('DB_TEST_WEB_APP_URL must be configured for database end-to-end tests.');
+        }
+        await page.goto(appUrl);
         await use(new HomePage(page));
     },
     registerPage: async ({ page }, use) => {

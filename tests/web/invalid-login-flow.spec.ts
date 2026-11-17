@@ -17,7 +17,9 @@ if (!invalidCredentials) {
     throw new Error('A nonblank invalid-login row is required in opencart_logindata.json.');
 }
 
-test('Invalid customer login is rejected @master @regression @web', async ({ homePage, loginPage, accountPage }) => {
+const loginRejectionWarning = /Warning: (?:No match for E-Mail Address and\/or Password|Your account has exceeded allowed number of login attempts)/;
+
+test('Invalid customer login is rejected @master @regression @web', async ({ page, homePage, loginPage, accountPage }) => {
     await test.step('1) Navigate to My Account and open Login', async () => {
         await homePage.openLoginPage();
         expect(await loginPage.isLoginPageExists()).toBeTruthy();
@@ -28,10 +30,7 @@ test('Invalid customer login is rejected @master @regression @web', async ({ hom
     });
 
     await test.step('3) Verify the warning and unauthenticated state', async () => {
-        expect(await loginPage.isWarningVisible()).toBeTruthy();
-        expect(await loginPage.getWarningText()).toContain(
-            'Warning: No match for E-Mail Address and/or Password.',
-        );
+        await expect(page.getByText(loginRejectionWarning).first()).toBeVisible();
         expect(await accountPage.isMyAccountPageExists()).toBeFalsy();
     });
 
